@@ -5,9 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
-import java.awt.print.Pageable;
 
 @Builder
 @Data
@@ -24,7 +23,7 @@ public class PageRequestDTO {
 
     private String keyword;
 
-    public String[] getType() {
+    public String[] getTypes() {
         if(type == null || type.isEmpty()) {
             return null;
         }
