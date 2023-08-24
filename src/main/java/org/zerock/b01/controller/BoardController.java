@@ -52,4 +52,12 @@ public class BoardController {
         redirectAttributes.addFlashAttribute("result",bno);
         return "redirect:/board/list";
     }
+
+    @GetMapping("/read")
+    public void read(Long bno, PageRequestDTO pagerRequestDTO, Model model) {
+
+        BoardDTO boardDTO =boardService.readOne(bno);
+        log.info(boardDTO);
+        model.addAttribute("dto",boardDTO);
+    }
 }
