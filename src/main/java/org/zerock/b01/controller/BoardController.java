@@ -1,5 +1,6 @@
 package org.zerock.b01.controller;
 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
@@ -23,41 +24,109 @@ import javax.validation.Valid;
 public class BoardController {
 
     private final BoardService boardService;
+
     @GetMapping("/list")
-    public void list(PageRequestDTO pageRequestDTO, Model model) {
+    public void list(PageRequestDTO pageRequestDTO, Model model){
 
         PageResponseDTO<BoardDTO> responseDTO = boardService.list(pageRequestDTO);
+
         log.info(responseDTO);
+
         model.addAttribute("responseDTO", responseDTO);
+
     }
 
-    // 등록화면 보기
     @GetMapping("/register")
-    public void registerGET() {
+    public void registerGET(){
 
     }
 
     @PostMapping("/register")
-    public String registerPost(@Valid BoardDTO boardDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        log.info("board POST register입니다!");
+    public String registerPost(@Valid BoardDTO boardDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes){
 
-        // @Vaild 부분에서 문제 발생 > 모든 에러를 'errors'이름으로 redirecAttributes로 추가해서 전송
+        log.info("board POST register.......");
+
         if(bindingResult.hasErrors()) {
-            log.info("에러가 있어요");
-            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
+            log.info("has errors.......");
+            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors() );
             return "redirect:/board/register";
         }
+
         log.info(boardDTO);
-        Long bno = boardService.register(boardDTO);
-        redirectAttributes.addFlashAttribute("result",bno);
+
+        Long bno  = boardService.register(boardDTO);
+
+        redirectAttributes.addFlashAttribute("result", bno);
+
         return "redirect:/board/list";
     }
 
-    @GetMapping("/read")
-    public void read(Long bno, PageRequestDTO pagerRequestDTO, Model model) {
 
-        BoardDTO boardDTO =boardService.readOne(bno);
+//    @GetMapping("/read")
+//    public void read(Long bno, PageRequestDTO pageRequestDTO, Model model){
+//
+//        BoardDTO boardDTO = boardService.readOne(bno);
+//
+//        log.info(boardDTO);
+//
+//        model.addAttribute("dto", boardDTO);
+//
+//    }
+
+
+    @GetMapping({"/read", "/modify"})
+    public void read(Long bno, PageRequestDTO pageRequestDTO, Model model){
+
+        BoardDTO boardDTO = boardService.readOne(bno);
+
         log.info(boardDTO);
-        model.addAttribute("dto",boardDTO);
+
+        model.addAttribute("dto", boardDTO);
+
     }
+
+    @PostMapping("/modify")
+    public String modify( PageRequestDTO pageRequestDTO,
+                          @Valid BoardDTO boardDTO,
+                          BindingResult bindingResult,
+                          RedirectAttributes redirectAttributes){
+
+        log.info("board modify post......." + boardDTO);
+
+        if(bindingResult.hasErrors()) {
+            log.info("has errors.......");
+
+            String link = pageRequestDTO.getLink();
+
+            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors() );
+
+            redirectAttributes.addAttribute("bno", boardDTO.getBno());
+
+            return "redirect:/board/modify?"+link;
+        }
+
+        boardService.modify(boardDTO);
+
+        redirectAttributes.addFlashAttribute("result", "modified");
+
+        redirectAttributes.addAttribute("bno", boardDTO.getBno());
+
+        return "redirect:/board/read";
+    }
+
+
+    @PostMapping("/remove")
+    public String remove(Long bno, RedirectAttributes redirectAttributes) {
+
+        log.info("remove post.. " + bno);
+
+        boardService.remove(bno);
+
+        redirectAttributes.addFlashAttribute("result", "removed");
+
+        return "redirect:/board/list";
+
+    }
+
+
 }
